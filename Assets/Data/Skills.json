@@ -1,0 +1,10 @@
+﻿{
+  "skills":[
+    {
+      "id": 0,
+      "name": "十字斩",
+      "directionalActs" : 466722,
+      "positionalActs" : 456852
+    }
+  ]
+}
