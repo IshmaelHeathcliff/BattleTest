@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿#define Sqlite
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,7 +6,9 @@ using UnityEngine.UI;
 
 public class PlayerBattle : MonoBehaviour
 {
-    [HideInInspector]public List<Skill> learnedSkills = new List<Skill>();
+    static PlayerBattle _instance;
+    public static PlayerBattle Instance => _instance;
+    
     public int actLimit = 7;
     public float strength = 90;
     public float[] enemyDefence =
@@ -15,12 +16,19 @@ public class PlayerBattle : MonoBehaviour
         80, 80, 80, 60, 20, 60, 20, 10, 20
     };
 
-    public bool isReset = true;
+    public float maxHealth = 100f;
+    float _health;
     
+
+    readonly Dictionary<int,int> _skillCountInATurn = new Dictionary<int, int>();
+
+    public bool isReset = true;
+    public bool isPlayerTurn = true;
     int _attackActs;
     Animator _animator;
     Text _actsText;
     Text _skillText;
+    Slider _healthSlider;
     float _enemyDefence;
     int _lastSkillId = -1;
    
@@ -40,18 +48,20 @@ public class PlayerBattle : MonoBehaviour
 
     void Awake()
     {
+        if (_instance == null)
+        {
+            _instance = this;
+        }
         _animator = GetComponent<Animator>();
         _actsText = GameObject.Find("AttackActs").GetComponent<Text>();
         _skillText = GameObject.Find("SkillText").GetComponent<Text>();
+        _healthSlider = GameObject.Find("Health").GetComponent<Slider>();
     }
 
     void Start()
     {
         SceneLinkedSMB<PlayerBattle>.Initialise(_animator, this);
-        foreach (var skillInfo in SkillsInfo.Instance.skillsInfo)
-        {
-            learnedSkills.Add(new Skill(skillInfo));
-        }
+        _health = maxHealth;
     }
 
     void FixedUpdate()
@@ -59,7 +69,7 @@ public class PlayerBattle : MonoBehaviour
         Act();
     }
 
-    public void Act()
+    void Act()
     {
         var buttons = PlayerInput.Instance.Buttons;
         if (buttons["Dodge"].Up)
@@ -91,6 +101,7 @@ public class PlayerBattle : MonoBehaviour
         {
             if(_attackActs != 0)
                 Strike();
+            isPlayerTurn = false;
             return;
         }
     }
@@ -102,20 +113,27 @@ public class PlayerBattle : MonoBehaviour
         _enemyDefence += enemyDefence[number - 1];
     }
 
-    public void Strike()
+    void Strike()
     {
         _animator.Play("Center");
         _skillText.text = "无招";
-
-        foreach (var skill in learnedSkills.Where(skill => _attackActs == skill.Acts))
+        
+#if Json
+        foreach (var skill in SkillsJson.Instance.learnedSkills.Where(skill => _attackActs == skill.positionalActs))
         {
-            _skillText.text = skill.Name;
+#elif Sqlite
+        if (SqLiteController.Instance.ExistSkillActs(_attackActs))
+        {
+            var skill = SqLiteController.Instance.GetLearnedSkillByActs(_attackActs);
+#endif
+            _skillText.text = skill.name;
+            if(!_skillCountInATurn.ContainsKey(skill.id)) _skillCountInATurn.Add(skill.id, 0);
             Debug.Log("Damage:" + 
                       CalculateDamage(strength, _enemyDefence,  _attackActs, 
-                          skill.Ratio, _lastSkillId == skill.PreviousID, 
-                          skill.CountInATurn < 5 ? skill.CountInATurn : 5));
-            _lastSkillId = skill.ID;
-            skill.CountInATurn += 1;
+                          skill.damageRatio, _lastSkillId == skill.previousId, 
+                          _skillCountInATurn[skill.id] < 5 ? _skillCountInATurn[skill.id] : 5));
+            _lastSkillId = skill.id;
+            _skillCountInATurn[skill.id] += 1;
             isReset = true;
             return;
         }
@@ -140,5 +158,11 @@ public class PlayerBattle : MonoBehaviour
         var comboRatio = isCombo ? 1.5f : 1f;
         var skillRatio = ((ratio - 1) * (1 - skillCount * 0.2f) + 1); 
         return  str * skillRatio * comboRatio * enemyRatio;
+    }
+
+    public void HurtBy(EnemySkill enemySkill)
+    {
+        _health -= enemySkill.damage;
+        _healthSlider.value = _health / maxHealth;
     }
 }
