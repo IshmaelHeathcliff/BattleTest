@@ -69,7 +69,7 @@ public class SqLiteController : MonoBehaviour
         };
     }
 
-    public List<EnemySkill> GetEnemySkills(int id)
+    public IEnumerable<EnemySkill> GetEnemySkills(int id)
     {
         var enemySkills = new List<EnemySkill>();
         var reader = _skillsHelper.ExecuteQuery($"SELECT * FROM enemy_skill WHERE enemy_id = {id}");

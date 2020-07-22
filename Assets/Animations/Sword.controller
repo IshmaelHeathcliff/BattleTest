@@ -116,7 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actNumber: 3
-  actName: R
+  actName: RD
 --- !u!1102 &-6508217796207632273
 AnimatorState:
   serializedVersion: 5
@@ -1023,7 +1023,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actNumber: 1
-  actName: L
+  actName: LD
 --- !u!1101 &1678916272711533119
 AnimatorStateTransition:
   m_ObjectHideFlags: 1

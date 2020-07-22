@@ -31,6 +31,8 @@ public class PlayerBattle : MonoBehaviour
     Slider _healthSlider;
     float _enemyDefence;
     int _lastSkillId = -1;
+
+    Enemy _enemy;
    
 
     readonly List<string> _directions = new List<string>
@@ -62,6 +64,7 @@ public class PlayerBattle : MonoBehaviour
     {
         SceneLinkedSMB<PlayerBattle>.Initialise(_animator, this);
         _health = maxHealth;
+        _enemy = FindObjectOfType<Enemy>();
     }
 
     void FixedUpdate()
@@ -71,22 +74,20 @@ public class PlayerBattle : MonoBehaviour
 
     void Act()
     {
+        if (!isPlayerTurn) return;
+        
         var buttons = PlayerInput.Instance.Buttons;
         if (buttons["Dodge"].Up)
         {
-            return;
         }
-
-        if (buttons["Defend"].Up)
+        else if (buttons["Defend"].Up)
         {
-            return;
         }
 
         foreach (var d in _directions)
         {
             _animator.ResetTrigger(d);
         }
-        
 
         if (_attackActs < Mathf.Pow(10, actLimit))
         {
@@ -101,8 +102,6 @@ public class PlayerBattle : MonoBehaviour
         {
             if(_attackActs != 0)
                 Strike();
-            isPlayerTurn = false;
-            return;
         }
     }
 
@@ -128,8 +127,7 @@ public class PlayerBattle : MonoBehaviour
 #endif
             _skillText.text = skill.name;
             if(!_skillCountInATurn.ContainsKey(skill.id)) _skillCountInATurn.Add(skill.id, 0);
-            Debug.Log("Damage:" + 
-                      CalculateDamage(strength, _enemyDefence,  _attackActs, 
+            _enemy.GetHurt(CalculateDamage(strength, _enemyDefence,  _attackActs, 
                           skill.damageRatio, _lastSkillId == skill.previousId, 
                           _skillCountInATurn[skill.id] < 5 ? _skillCountInATurn[skill.id] : 5));
             _lastSkillId = skill.id;
@@ -138,7 +136,7 @@ public class PlayerBattle : MonoBehaviour
             return;
         }
         
-        Debug.Log("Damage:" + CalculateDamage(strength, _enemyDefence,  _attackActs));
+        _enemy.GetHurt(CalculateDamage(strength, _enemyDefence, _attackActs));
         _lastSkillId = 0;
         isReset = true;
 

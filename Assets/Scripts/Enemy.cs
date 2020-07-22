@@ -2,31 +2,69 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
     public int id;
     public string enemyName;
-    public Stack<EnemySkill> enemySkills = new Stack<EnemySkill>();
-    public float health = 100f;
+    public Queue<EnemySkill> enemySkills = new Queue<EnemySkill>();
+    public float maxHealth = 1000f;
+    float _health;
+
+    Text _skillText;
+    Slider _healthSlider;
+    Animator _animator;
+    static readonly int _Attack = Animator.StringToHash("Attack");
+    static readonly int _Hurt = Animator.StringToHash("Hurt");
+
+    void Awake()
+    {
+        _skillText = GetComponentInChildren<Text>();
+        _healthSlider = GetComponentInChildren<Slider>();
+        _animator = GetComponentInChildren<Animator>();
+    }
 
     void Start()
     {
+        SceneLinkedSMB<Enemy>.Initialise(_animator,this);
         var skillList = SqLiteController.Instance.GetEnemySkills(id);
         foreach (var enemySkill in skillList)
         {
-            enemySkills.Push(enemySkill);
+            enemySkills.Enqueue(enemySkill);
         }
+
+        _health = maxHealth;
     }
 
-    void Update()
+    public void EndTurn()
     {
-        if (!PlayerBattle.Instance.isPlayerTurn && enemySkills.Count != 0)
-        {
-           PlayerBattle.Instance.HurtBy(enemySkills.Pop());
-           PlayerBattle.Instance.isPlayerTurn = true;
-        }
+        PlayerBattle.Instance.isPlayerTurn = true;
+    }
 
+    public void StartTurn()
+    {
+        PlayerBattle.Instance.isPlayerTurn = false;
+    }
+
+    public void GetHurt(float damage)
+    {
+        _health -= damage;
+        _healthSlider.value = _health / maxHealth;
+        _animator.SetTrigger(_Hurt);
+    }
+
+    public void Attack()
+    {
+        var nextSkill = enemySkills.Dequeue();
+        PlayerBattle.Instance.HurtBy(nextSkill);
+        enemySkills.Enqueue(nextSkill);
+    }
+
+    public void Indicate()
+    {
+        var nextSkill = enemySkills.Peek();
+        _skillText.text = nextSkill.skillName;
     }
 }
 
@@ -41,6 +79,6 @@ public class EnemySkill: IComparable<EnemySkill>
     {
         if (ReferenceEquals(this, other)) return 0;
         if (ReferenceEquals(null, other)) return 1;
-        return -sequence.CompareTo(other.sequence);
+        return sequence.CompareTo(other.sequence);
     }
 }
