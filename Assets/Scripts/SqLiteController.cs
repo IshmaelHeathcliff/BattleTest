@@ -80,7 +80,8 @@ public class SqLiteController : MonoBehaviour
                     damage = reader.GetFloat(reader.GetOrdinal("damage")),
                     skillName = reader.GetString(reader.GetOrdinal("skill_name")),
                     accuracy = reader.GetFloat(reader.GetOrdinal("accuracy")),
-                    sequence = reader.GetInt32(reader.GetOrdinal("sequence"))
+                    sequence = reader.GetInt32(reader.GetOrdinal("sequence")),
+                    penetration = reader.GetFloat(reader.GetOrdinal("penetration"))
                 }
             );
         }

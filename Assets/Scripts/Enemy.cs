@@ -9,13 +9,17 @@ public class Enemy : MonoBehaviour
     public int id;
     public string enemyName;
     public Queue<EnemySkill> enemySkills = new Queue<EnemySkill>();
+    public float[] enemyDefence = 
+    {
+        80, 80, 80, 60, 20, 60, 20, 10, 20
+    };
     public float maxHealth = 1000f;
     float _health;
 
     Text _skillText;
     Slider _healthSlider;
     Animator _animator;
-    static readonly int _Attack = Animator.StringToHash("Attack");
+    Image _image;
     static readonly int _Hurt = Animator.StringToHash("Hurt");
 
     void Awake()
@@ -23,6 +27,7 @@ public class Enemy : MonoBehaviour
         _skillText = GetComponentInChildren<Text>();
         _healthSlider = GetComponentInChildren<Slider>();
         _animator = GetComponentInChildren<Animator>();
+        _image = GetComponentInChildren<Image>();
     }
 
     void Start()
@@ -72,6 +77,7 @@ public class EnemySkill: IComparable<EnemySkill>
 {
     public float damage;
     public float accuracy;
+    public float penetration;
     public string skillName;
     public int sequence;
 

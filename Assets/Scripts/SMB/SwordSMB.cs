@@ -8,16 +8,11 @@ public class SwordSMB : SceneLinkedSMB<PlayerBattle>
     public string actName;
     public override void OnSLStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (actNumber == 5 && SLMonoBehaviour.isReset) return;
-        SLMonoBehaviour.AddAct(actNumber, actName);
-    }
-
-    public override void OnSLStateNoTransitionUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        if (actNumber == 5 && SLMonoBehaviour.isReset)
+        if (actNumber == 5 && SLMonoBehaviour.isTurnReset)
         {
-            SLMonoBehaviour.Reset();
-            SLMonoBehaviour.isReset = false;
+            SLMonoBehaviour.isTurnReset = false;
+            return;
         }
+        SLMonoBehaviour.AddAct(actNumber, actName);
     }
 }
