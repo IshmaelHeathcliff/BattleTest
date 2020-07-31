@@ -52,8 +52,6 @@ public class PlayerBattle : MonoBehaviour
         {
             _instance = this;
         }
-        
-        Pause();
 
         _animator = GetComponent<Animator>();
         _actsText = GameObject.Find("AttackActs").GetComponent<Text>();
@@ -63,6 +61,7 @@ public class PlayerBattle : MonoBehaviour
 
     void Start()
     {
+        Pause();
         SceneLinkedSMB<PlayerBattle>.Initialise(_animator, this);
         _enemy = FindObjectOfType<Enemy>();
     }
@@ -153,6 +152,7 @@ public class PlayerBattle : MonoBehaviour
         }
 
         ResetTurn();
+        SoundManager.Instance.PlayAttackSound();
     }
 
     public void Dodge()
@@ -203,6 +203,7 @@ public class PlayerBattle : MonoBehaviour
         }
         else
             ExecuteDamage(enemySkill.damage);
+        SoundManager.Instance.PlayAttackSound();
     }
 
     public void Pause()
