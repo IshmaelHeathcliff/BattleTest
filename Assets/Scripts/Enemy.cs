@@ -44,12 +44,12 @@ public class Enemy : MonoBehaviour
 
     public void EndTurn()
     {
-        PlayerBattle.Instance.isPlayerTurn = true;
+        PlayerBattle.Instance.IsPlayerTurn = true;
     }
 
     public void StartTurn()
     {
-        PlayerBattle.Instance.isPlayerTurn = false;
+        PlayerBattle.Instance.IsPlayerTurn = false;
     }
 
     public void GetHurt(float damage)

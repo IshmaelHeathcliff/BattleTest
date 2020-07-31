@@ -8,7 +8,7 @@ public class EnemyIdleSMB : SceneLinkedSMB<Enemy>
 
     public override void OnSLStateNoTransitionUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (!PlayerBattle.Instance.isPlayerTurn)
+        if (!PlayerBattle.Instance.IsPlayerTurn)
         {
             animator.SetTrigger(_Attack);
         }

@@ -1,5 +1,4 @@
-﻿#define Sqlite
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -10,11 +9,8 @@ public class PlayerBattle : MonoBehaviour
     static PlayerBattle _instance;
     public static PlayerBattle Instance => _instance;
 
-    public PlayerProperty Property { get; } = new PlayerProperty();
     readonly Dictionary<int, int> _skillCountInATurn = new Dictionary<int, int>();
     public int actLimit = 8;
-    public bool isTurnReset = true;
-    public bool isPlayerTurn = true;
     bool _isDodge;
     bool _isDefend;
     bool _isStrike;
@@ -26,7 +22,7 @@ public class PlayerBattle : MonoBehaviour
     Text _skillText;
     Slider _healthSlider;
     Enemy _enemy;
-
+    
     readonly List<string> _directions = new List<string>
     {
         "LeftDown",
@@ -40,6 +36,10 @@ public class PlayerBattle : MonoBehaviour
         "RightUp",
     };
 
+    public bool IsTurnReset { get; set;} = true;
+    public bool IsPlayerTurn { get; set;} = true;
+    public PlayerProperty Property { get; } = new PlayerProperty();
+    
     static readonly int _Dodge = Animator.StringToHash("Dodge");
     static readonly int _Defend = Animator.StringToHash("Defend");
     static readonly int _Strike = Animator.StringToHash("Strike");
@@ -70,7 +70,7 @@ public class PlayerBattle : MonoBehaviour
 
     void Act()
     {
-        if (!isPlayerTurn) return;
+        if (!IsPlayerTurn) return;
 
         var buttons = PlayerInput.Instance.Buttons;
         if (buttons["Dodge"].Up)
@@ -105,7 +105,7 @@ public class PlayerBattle : MonoBehaviour
 
     void ResetTurn()
     {
-        isTurnReset = true;
+        IsTurnReset = true;
         _enemyDefence = 0;
         _attackActs = 0;
         _actsText.text = "";
@@ -130,14 +130,9 @@ public class PlayerBattle : MonoBehaviour
 
     public void Strike()
     {
-#if Json
-        foreach (var skill in SkillsJson.Instance.learnedSkills.Where(skill => _attackActs == skill.positionalActs))
-        {
-#elif Sqlite
         if (SqLiteController.Instance.ExistSkillActs(_attackActs))
         {
             var skill = SqLiteController.Instance.GetLearnedSkillByActs(_attackActs);
-#endif
             _skillText.text = skill.name;
             if (!_skillCountInATurn.ContainsKey(skill.id)) _skillCountInATurn.Add(skill.id, 0);
             _enemy.GetHurt(CalculateDamage(Property.strength, _enemyDefence, _attackActs,
@@ -161,7 +156,7 @@ public class PlayerBattle : MonoBehaviour
         _isDodge = true;
         _skillText.text = "闪避";
         ResetTurn();
-        isPlayerTurn = false;
+        IsPlayerTurn = false;
     }
 
     public void Defend()
@@ -169,7 +164,7 @@ public class PlayerBattle : MonoBehaviour
         _isDefend = true;
         _skillText.text = "防御";
         ResetTurn();
-        isPlayerTurn = false;
+        IsPlayerTurn = false;
     }
 
     public void AddAct(int number, string actName)

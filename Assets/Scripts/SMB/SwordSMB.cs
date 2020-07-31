@@ -8,9 +8,9 @@ public class SwordSMB : SceneLinkedSMB<PlayerBattle>
     public string actName;
     public override void OnSLStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (actNumber == 5 && SLMonoBehaviour.isTurnReset)
+        if (actNumber == 5 && SLMonoBehaviour.IsTurnReset)
         {
-            SLMonoBehaviour.isTurnReset = false;
+            SLMonoBehaviour.IsTurnReset = false;
             return;
         }
         SLMonoBehaviour.AddAct(actNumber, actName);
