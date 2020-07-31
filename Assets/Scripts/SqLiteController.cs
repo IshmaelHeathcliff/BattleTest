@@ -8,71 +8,94 @@ public class SqLiteController : MonoBehaviour
     static SqLiteController _instance;
     public static SqLiteController Instance => _instance;
 
-    SqLiteHelper _skillsHelper;
+    SqLiteHelper _sqliteHelper;
 
     void Awake()
     {
         if (_instance == null)
             _instance = this;
 
-        _skillsHelper = new SqLiteHelper("URI=file:" + Application.dataPath + "\\Data\\Data.db");
+        _sqliteHelper = new SqLiteHelper("URI=file:" + Application.dataPath + "\\Data\\Data.db");
     }
 
     void OnDestroy()
     {
-        _skillsHelper.CloseConnection();
+        _sqliteHelper.CloseConnection();
     }
-
+    
+    #region player
     public void LearnSkillById(int id)
     {
-        if (_skillsHelper.ExecuteQuery($"SELECT id FROM skill WHERE id = {id}").Read())
+        if (_sqliteHelper.ExecuteQuery($"SELECT id FROM skill WHERE id = {id}").Read())
         {
-            _skillsHelper.ExecuteQuery($"INSERT INTO learned_skill(id) VALUES({id})");
+            _sqliteHelper.ExecuteQuery($"INSERT INTO learned_skill(id) VALUES({id})");
         }
     }
 
-    public bool ExistSkillActs(int acts)
+    public bool ExistSkillActs(long acts)
     {
-        return _skillsHelper.ExecuteQuery($"SELECT * FROM learned_skill_view WHERE positional_acts = {acts}").Read();
+        return _sqliteHelper.ExecuteQuery($"SELECT * FROM learned_skill_view WHERE positional_acts = {acts}").Read();
     }
 
+    public List<Skill> GetLearnedSkills()
+    {
+        var learnedSkills = new List<Skill>();
+        var reader = _sqliteHelper.ExecuteQuery($"SELECT * FROM learned_skill_view");
+        while (reader.Read())
+        {
+            learnedSkills.Add(new Skill
+            {
+                id = reader.GetInt32(reader.GetOrdinal("id")),
+                name = reader.GetString(reader.GetOrdinal("skill_name")),
+                directionalActs = reader.GetInt64(reader.GetOrdinal("directional_acts")),
+                positionalActs = reader.GetInt64(reader.GetOrdinal("positional_acts")),
+                damageRatio = reader.GetFloat(reader.GetOrdinal("ratio")),
+                previousId = reader.GetInt32(reader.GetOrdinal("previous_id")),
+                count = reader.GetInt32(reader.GetOrdinal("count"))
+            });
+        }
+
+        return learnedSkills;
+    }
+    
     public Skill GetLearnedSkillById(int id)
     {
-        var reader = _skillsHelper.ExecuteQuery($"SELECT * FROM learned_skill_view WHERE id = {id}");
+        var reader = _sqliteHelper.ExecuteQuery($"SELECT * FROM learned_skill_view WHERE id = {id}");
         reader.Read();
         return new Skill
         {
             id = reader.GetInt32(reader.GetOrdinal("id")),
             name = reader.GetString(reader.GetOrdinal("skill_name")),
-            directionalActs = reader.GetInt32(reader.GetOrdinal("directional_acts")),
-            positionalActs = reader.GetInt32(reader.GetOrdinal("positional_acts")),
+            directionalActs = reader.GetInt64(reader.GetOrdinal("directional_acts")),
+            positionalActs = reader.GetInt64(reader.GetOrdinal("positional_acts")),
             damageRatio = reader.GetFloat(reader.GetOrdinal("ratio")),
             previousId = reader.GetInt32(reader.GetOrdinal("previous_id")),
             count = reader.GetInt32(reader.GetOrdinal("count"))
         };
     }
 
-
-    public Skill GetLearnedSkillByActs(int acts)
+    public Skill GetLearnedSkillByActs(long acts)
     {
-        var reader = _skillsHelper.ExecuteQuery($"SELECT * FROM learned_skill_view WHERE positional_acts = {acts}");
+        var reader = _sqliteHelper.ExecuteQuery($"SELECT * FROM learned_skill_view WHERE positional_acts = {acts}");
         reader.Read();
         return new Skill
         {
             id = reader.GetInt32(reader.GetOrdinal("id")),
             name = reader.GetString(reader.GetOrdinal("skill_name")),
-            directionalActs = reader.GetInt32(reader.GetOrdinal("directional_acts")),
-            positionalActs = reader.GetInt32(reader.GetOrdinal("positional_acts")),
+            directionalActs = reader.GetInt64(reader.GetOrdinal("directional_acts")),
+            positionalActs = reader.GetInt64(reader.GetOrdinal("positional_acts")),
             damageRatio = reader.GetFloat(reader.GetOrdinal("ratio")),
             previousId = reader.GetInt32(reader.GetOrdinal("previous_id")),
             count = reader.GetInt32(reader.GetOrdinal("count"))
         };
     }
-
+    #endregion
+    
+    #region enemy
     public IEnumerable<EnemySkill> GetEnemySkills(int id)
     {
         var enemySkills = new List<EnemySkill>();
-        var reader = _skillsHelper.ExecuteQuery($"SELECT * FROM enemy_skill WHERE enemy_id = {id}");
+        var reader = _sqliteHelper.ExecuteQuery($"SELECT * FROM enemy_skill WHERE enemy_id = {id}");
         while(reader.Read())
         {
             enemySkills.Add(new EnemySkill
@@ -89,5 +112,5 @@ public class SqLiteController : MonoBehaviour
         enemySkills.Sort();
         return enemySkills;
     }
-
+    #endregion
 }

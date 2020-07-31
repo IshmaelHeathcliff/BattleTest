@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class PlayerBattle : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class PlayerBattle : MonoBehaviour
     bool _isDodge;
     bool _isDefend;
     bool _isStrike;
-    int _attackActs;
+    long _attackActs;
     float _enemyDefence;
     int _lastSkillId = -1;
     Animator _animator;
@@ -50,6 +52,8 @@ public class PlayerBattle : MonoBehaviour
         {
             _instance = this;
         }
+        
+        Pause();
 
         _animator = GetComponent<Animator>();
         _actsText = GameObject.Find("AttackActs").GetComponent<Text>();
@@ -118,7 +122,7 @@ public class PlayerBattle : MonoBehaviour
         _healthSlider.value = Property.health / Property.maxHealth;
     }
 
-    float CalculateDamage(float str, float defence, int attackActs, float ratio = 1f, bool isCombo = false,
+    float CalculateDamage(float str, float defence, long attackActs, float ratio = 1f, bool isCombo = false,
         int skillCount = 0)
     {
         var actTimes = attackActs > 9 ? Mathf.CeilToInt(Mathf.Log10(attackActs)) : 1;
@@ -200,6 +204,18 @@ public class PlayerBattle : MonoBehaviour
         else
             ExecuteDamage(enemySkill.damage);
     }
+
+    public void Pause()
+    {
+        Time.timeScale = 0;
+        PlayerInput.Instance.ReleaseControl();
+    }
+
+    public void Unpause()
+    {
+        Time.timeScale = 1;
+        PlayerInput.Instance.GainControl();
+    }
 }
 
 public class PlayerProperty
@@ -216,5 +232,43 @@ public class PlayerProperty
         strength = str;
         defence = def;
         speed = spd;
+    }
+}
+
+public class Skill
+{
+    public int id;
+    public string name;
+    public long directionalActs;
+    public long positionalActs;
+    public float damageRatio;
+    public int previousId;
+    public int count;
+
+    readonly string[] _position = {"LD", "D", "RD", "L", "C", "R", "LU", "U", "RU"};
+
+    string PosActs(long posActs)
+    {
+        var posStr = "";
+        var pos = new Stack<long>();
+        while (posActs > 0)
+        {
+            pos.Push(posActs % 10);
+            posActs /= 10;
+        }
+
+        while (pos.Count > 0)
+        {
+            posStr += _position[pos.Pop() - 1] + " ";
+        }
+
+        return posStr;
+    }
+
+    public override string ToString()
+    {
+        return previousId <= 0 ? 
+            $"剑技：{name}\nid：{id}\n轨迹：{PosActs(positionalActs)}\n\n" : 
+            $"剑技：{name}\nid：{id}\n轨迹：{PosActs(positionalActs)}\n前一连招id：{previousId}\n\n";
     }
 }
