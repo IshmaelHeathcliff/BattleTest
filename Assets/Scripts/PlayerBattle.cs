@@ -61,7 +61,6 @@ public class PlayerBattle : MonoBehaviour
 
     void Start()
     {
-        Pause();
         SceneLinkedSMB<PlayerBattle>.Initialise(_animator, this);
         _enemy = FindObjectOfType<Enemy>();
     }
@@ -117,7 +116,7 @@ public class PlayerBattle : MonoBehaviour
     void ExecuteDamage(float dmg)
     {
         Property.health -= dmg;
-        Debug.Log("Enemy Damage:" + dmg);
+        Debug.Log("受到伤害:" + dmg);
         _healthSlider.value = Property.health / Property.maxHealth;
     }
 
@@ -128,6 +127,7 @@ public class PlayerBattle : MonoBehaviour
         var enemyRatio = (100 * actTimes - defence) / (100 * actTimes);
         var comboRatio = isCombo ? 1.5f : 1f;
         var skillRatio = ((ratio - 1) * (1 - skillCount * 0.2f) + 1);
+        Debug.Log("攻击伤害：" + str * skillRatio * comboRatio * enemyRatio);
         return str * skillRatio * comboRatio * enemyRatio;
     }
 
@@ -198,24 +198,12 @@ public class PlayerBattle : MonoBehaviour
         }
         else if (_isDefend)
         {
-            ExecuteDamage(enemySkill.damage * (Property.defence / (Property.defence + enemySkill.penetration)));
+            ExecuteDamage(enemySkill.damage * (enemySkill.penetration / (Property.defence + enemySkill.penetration)));
             _isDefend = false;
         }
         else
             ExecuteDamage(enemySkill.damage);
         SoundManager.Instance.PlayAttackSound();
-    }
-
-    public void Pause()
-    {
-        Time.timeScale = 0;
-        PlayerInput.Instance.ReleaseControl();
-    }
-
-    public void Unpause()
-    {
-        Time.timeScale = 1;
-        PlayerInput.Instance.GainControl();
     }
 }
 

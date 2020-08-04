@@ -16,6 +16,8 @@ public class Enemy : MonoBehaviour
     public float maxHealth = 1000f;
     float _health;
 
+    public float Health => _health;
+
     Text _skillText;
     Slider _healthSlider;
     Animator _animator;
@@ -39,6 +41,7 @@ public class Enemy : MonoBehaviour
             enemySkills.Enqueue(enemySkill);
         }
 
+        Indicate();
         _health = maxHealth;
     }
 

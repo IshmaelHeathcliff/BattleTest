@@ -12,9 +12,5 @@ public class EnemyIdleSMB : SceneLinkedSMB<Enemy>
         {
             animator.SetTrigger(_Attack);
         }
-        else
-        {
-            SLMonoBehaviour.Indicate();
-        }
     }
 }
