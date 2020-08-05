@@ -30,10 +30,7 @@ public class EnemyFactory : MonoBehaviour
             {0, Application.dataPath + @"/Artworks/Wolf.png"},
             {1, Application.dataPath + @"/Artworks/yangzi.png"}
         };
-    }
-
-    void Start()
-    {
+        
         var randomEnemyId = Random.Range(0, enemyAmount);
         var enemy = enemyPrefab.GetComponent<Enemy>();
         var enemyImage = enemyPrefab.GetComponentInChildren<Image>();
