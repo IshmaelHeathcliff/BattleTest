@@ -24,21 +24,23 @@ public class EnemyFactory : MonoBehaviour
         {
             _instance = this;
         }
-        
-        _enemyImagePaths = new Dictionary<int, string>
-        {
-            {0, Application.dataPath + @"/Artworks/Wolf.png"},
-            {1, Application.dataPath + @"/Artworks/yangzi.png"}
-        };
-        
-        var randomEnemyId = Random.Range(0, enemyAmount);
-        var enemy = enemyPrefab.GetComponent<Enemy>();
-        var enemyImage = enemyPrefab.GetComponentInChildren<Image>();
-        enemy.id = randomEnemyId;
-        enemyImage.sprite = LoadTexture2Sprite(_enemyImagePaths[randomEnemyId]);
-        Instantiate(enemyPrefab, GameObject.Find("Level").transform);
     }
 
+    void Start()
+    {
+        var randomID = Random.Range(0, enemyAmount);
+        InstantiateEnemyById(randomID);
+    }
+
+    void InstantiateEnemyById(int id)
+    {
+        enemyPrefab.GetComponent<Enemy>().Property = SqLiteController.Instance.GetEnemyById(id);;
+        var enemyGameObject = Instantiate(enemyPrefab, GameObject.Find("Level").transform);
+        var enemy = enemyGameObject.GetComponent<Enemy>();
+        enemy.Property = SqLiteController.Instance.GetEnemyById(id);
+        enemy.Property.health = enemy.Property.maxHealth;
+        enemy.GetComponentInChildren<Image>().sprite = LoadTexture2Sprite(Application.dataPath + enemy.Property.imagePath);
+    }
 
     byte[] GetImageByte(string imagePath)
     {

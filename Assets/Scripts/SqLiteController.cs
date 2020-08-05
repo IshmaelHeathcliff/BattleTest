@@ -112,5 +112,28 @@ public class SqLiteController : MonoBehaviour
         enemySkills.Sort();
         return enemySkills;
     }
+
+    public EnemyProperty GetEnemyById(int id)
+    {
+        var reader = _sqliteHelper.ExecuteQuery($"SELECT * FROM enemy WHERE enemy_id = {id}");
+        if (reader.Read())
+        {
+            var def = new int[9];
+            for (int i = 1; i<10; i++)
+            {
+                def[i-1] = reader.GetInt32(reader.GetOrdinal($"defence_{i}"));
+            }
+            return new EnemyProperty
+            {
+                id = reader.GetInt32(reader.GetOrdinal("enemy_id")),
+                enemyName = reader.GetString(reader.GetOrdinal("enemyName")),
+                maxHealth = reader.GetFloat(reader.GetOrdinal("max_health")), 
+                defence = def,
+                imagePath = reader.GetString(reader.GetOrdinal("image_path"))
+            };
+        }
+
+        return null;
+    }
     #endregion
 }

@@ -2,21 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    public int id;
-    public string enemyName;
     public Queue<EnemySkill> enemySkills = new Queue<EnemySkill>();
-    public float[] enemyDefence = 
-    {
-        80, 80, 80, 60, 20, 60, 20, 10, 20
-    };
-    public float maxHealth = 1000f;
-    float _health;
-
-    public float Health => _health;
+    public EnemyProperty Property { get; set; } = new EnemyProperty();
 
     Text _skillText;
     Slider _healthSlider;
@@ -35,14 +27,13 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         SceneLinkedSMB<Enemy>.Initialise(_animator,this);
-        var skillList = SqLiteController.Instance.GetEnemySkills(id);
+        var skillList = SqLiteController.Instance.GetEnemySkills(Property.id);
         foreach (var enemySkill in skillList)
         {
             enemySkills.Enqueue(enemySkill);
         }
 
         Indicate();
-        _health = maxHealth;
     }
 
     public void EndTurn()
@@ -57,8 +48,8 @@ public class Enemy : MonoBehaviour
 
     public void GetHurt(float damage)
     {
-        _health -= damage;
-        _healthSlider.value = _health / maxHealth;
+        Property.health -= damage;
+        _healthSlider.value = Property.health / Property.maxHealth;
         _animator.SetTrigger(_Hurt);
     }
 
@@ -90,4 +81,14 @@ public class EnemySkill: IComparable<EnemySkill>
         if (ReferenceEquals(null, other)) return 1;
         return sequence.CompareTo(other.sequence);
     }
+}
+
+public class EnemyProperty
+{
+    public int id;
+    public string enemyName;
+    public int[] defence = new int[9];
+    public float maxHealth;
+    public string imagePath;
+    public float health;
 }

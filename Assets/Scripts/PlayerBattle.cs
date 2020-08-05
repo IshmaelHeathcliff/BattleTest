@@ -23,8 +23,9 @@ public class PlayerBattle : MonoBehaviour
     Text _actsText;
     Text _skillText;
     Slider _healthSlider;
-    Enemy _enemy;
-    
+
+    Enemy EnemyInScene => FindObjectOfType<Enemy>();
+
     readonly List<string> _directions = new List<string>
     {
         "LeftDown",
@@ -62,7 +63,6 @@ public class PlayerBattle : MonoBehaviour
     void Start()
     {
         SceneLinkedSMB<PlayerBattle>.Initialise(_animator, this);
-        _enemy = FindObjectOfType<Enemy>();
     }
 
     void FixedUpdate()
@@ -138,7 +138,7 @@ public class PlayerBattle : MonoBehaviour
             var skill = SqLiteController.Instance.GetLearnedSkillByActs(_attackActs);
             _skillText.text = skill.name;
             if (!_skillCountInATurn.ContainsKey(skill.id)) _skillCountInATurn.Add(skill.id, 0);
-            _enemy.GetHurt(CalculateDamage(Property.strength, _enemyDefence, _attackActs,
+            EnemyInScene.GetHurt(CalculateDamage(Property.strength, _enemyDefence, _attackActs,
                 skill.damageRatio, _lastSkillId == skill.previousId,
                 _skillCountInATurn[skill.id] < 5 ? _skillCountInATurn[skill.id] : 5));
             _lastSkillId = skill.id;
@@ -147,7 +147,7 @@ public class PlayerBattle : MonoBehaviour
         else
         {
             _skillText.text = "无招";
-            _enemy.GetHurt(CalculateDamage(Property.strength, _enemyDefence, _attackActs));
+            EnemyInScene.GetHurt(CalculateDamage(Property.strength, _enemyDefence, _attackActs));
             _lastSkillId = 0;
         }
 
@@ -175,7 +175,7 @@ public class PlayerBattle : MonoBehaviour
     {
         _attackActs = _attackActs * 10 + number;
         _actsText.text += actName + " ";
-        _enemyDefence += _enemy.enemyDefence[number - 1];
+        _enemyDefence += EnemyInScene.Property.defence[number - 1];
     }
 
     public void HurtBy(EnemySkill enemySkill)

@@ -6,7 +6,7 @@ public class EnemyHurtSMB : SceneLinkedSMB<Enemy>
 {
     public override void OnSLStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (SLMonoBehaviour.Health <= 0)
+        if (SLMonoBehaviour.Property.health <= 0)
         {
             SceneManagement.Instance.Win();
             return;
